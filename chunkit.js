@@ -15,16 +15,11 @@
     totalChunks: 0,
     nextChunk: 1,
     lastChunk: 0,
-    config: {
-      wait: 2500
-    },
+    wait: 2500,
+
 
     init: function () {
       return this;
-    },
-
-    configure: function (config) {
-      this.config = join(this.config, config);
     },
 
     step: function () {
@@ -58,7 +53,7 @@
     chunk: function (o) {
       this.chunks = buildChunks(o.arr, o.numOfChunks);
       this.totalChunks = o.numOfChunks;
-      this.wait = this.config.wait;
+      this.wait = this.wait;
       this.end = o.end || this.end;
       this.fn = o.fn;
 
