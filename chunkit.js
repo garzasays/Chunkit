@@ -27,20 +27,26 @@
       this.config = join(this.config, config);
     },
 
-    next: function () {
-
+    step: function () {
+      processChunk({
+        startFromChunk: this.lastChunk,
+        fn: this.fn
+      })
     },
 
-    prev: function () {
-
-    },
-
-    from: function () {
-
+    from: function (startFrom, runAllFlag) {
+      processChunk({
+        runAllFlag: runAllFlag || false,
+        startFromChunk: startFrom,
+        fn: this.fn
+      });
     },
 
     run: function () {
-      processChunk(this.fn);
+      processChunk({
+        runAllFlag: true,
+        fn: this.fn
+      });
 
     },
 
@@ -98,6 +104,7 @@
         chunks.push(tempArr);
         endChunk += itemsPerChunk;
         processedChunks++;
+
         _buildChunkRecursive();
 
       }
@@ -108,25 +115,41 @@
 
   }
 
-  function processChunk(fn) {
-    var currentChunk = chunkit.lastChunk === 0 ? 1 : chunkit.lastChunk + 1;
+  function processChunk(options) {
+    var currentChunk = options.startFromChunk || 0;
     var loopCount = chunkit.numOfChunks;
 
     _loop();
 
     function _loop() {
-      if (currentChunk > chunkit.totalChunks) {
+
+      if (currentChunk >= chunkit.totalChunks) {
+        chunkit.totalChunks = 0;
+        chunkit.lastChunk = 0;
+        chunkit.nextChunk = 1;
+        chunkit.chunks = [];
+        chunkit.fn = null;
         chunkit.end();
         return;
       }
 
       for (var i = 0; i < chunkit.chunks[currentChunk].length; i++) {
-        fn(chunkit.chunks[currentChunk][i]);
+        options.fn(chunkit.chunks[currentChunk][i]);
       }
-      
-      currentChunk++
 
-      _loop();
+      console.log('Chunk ' + currentChunk + ' Finished.');
+
+      currentChunk++;
+      chunkit.lastChunk++;
+      chunkit.nextChunk++;
+
+      if (options.runAllFlag) {
+
+        setTimeout(function () {
+          _loop();
+        }, chunkit.config.wait);
+
+      }
 
     }
 
